@@ -18,7 +18,7 @@ newPost();
 
 @return
 投稿に成功している場合
-int 記事ID
+string 記事個別URL
 エラーの場合
 array error
 ex.
@@ -32,14 +32,14 @@ $postData = array(
 	'wp_author_id' => 2
 );
 $result = $obj->newPost($postData);
-if($result['error']){
+if(isset($result['error'])){
 	echo $result['error'];
 }
 
 */
 require_once("XML/RPC.php");
 class wpPost {
-	private $host, $xmlrpc_path, $username, $passwd, $appkey, $client , $blog_id;
+	private $host, $xmlrpc_path, $username, $passwd, $appkey, $client , $blog_id, $blog_url;
 	
 	public function __construct( $host, $xmlrpc_path, $username, $passwd ){
 		$this->client = new XML_RPC_client($xmlrpc_path, $host, 80);
@@ -53,6 +53,7 @@ class wpPost {
 			array($this->appkey, $this->username, $this->passwd)
 		);
 		$result = $this->sendXMLRPC( $message );
+		$this->blog_url = $result[0]['url'];
 		$this->blog_id = new XML_RPC_Value($result[0]['blogid'], "string");
 	}
 	public function newPost( $data ){
@@ -106,7 +107,11 @@ class wpPost {
 			'metaWeblog.newPost',
 			array($this->blog_id, $this->username, $this->passwd, $content, $publish)
 		);
-		return $this->sendXMLRPC( $message );
+		$result = $this->sendXMLRPC( $message );
+		if( empty($result['error']) ){
+			$result = $this->blog_url . '?p=' . $result;
+		}
+		return $result;
 	}
 	//送信メソッド
 	public function sendXMLRPC( $message ){
@@ -123,3 +128,4 @@ class wpPost {
 		return XML_RPC_decode($response->value());
 	}
 }
+//必要そうなもの
