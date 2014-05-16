@@ -22,6 +22,8 @@ string 記事個別URL
 エラーの場合
 array error
 ex.
+<?php
+require_once("wpPost.php");
 $obj = new wpPost('localhost', '/wordpress/xmlrpc.php', 'username', 'pass');
 $postData = array(
 	'title' => 'タイトル',
@@ -35,7 +37,7 @@ $result = $obj->newPost($postData);
 if(isset($result['error'])){
 	echo $result['error'];
 }
-
+?>
 */
 require_once("XML/RPC.php");
 class wpPost {
